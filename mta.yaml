@@ -1,0 +1,56 @@
+_schema-version: "3.2"
+ID: ZBusinessPartner
+version: 0.0.1
+modules:
+- name: zbusinesspartner-approuter
+  type: approuter.nodejs
+  path: zbusinesspartner-approuter
+  requires:
+  - name: ZBusinessPartner_html_repo_runtime
+  - name: dest_ZBusinessPartner
+  parameters:
+    disk-quota: 256M
+    memory: 256M
+- name: ZBusinessPartner_ui_deployer
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: ZBusinessPartner_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - PartnerModule-content.zip
+      name: PartnerModule
+      target-path: resources/
+- name: PartnerModule
+  type: html5
+  path: PartnerModule
+  build-parameters:
+    builder: custom
+    commands:
+    - npm run build
+    supported-platforms: []
+resources:
+- name: ZBusinessPartner_html_repo_runtime
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-plan: app-runtime
+- name: ZBusinessPartner_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-plan: app-host
+- name: dest_ZBusinessPartner
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: destination
+    service-plan: lite
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm install
